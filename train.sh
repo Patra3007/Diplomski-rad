@@ -1,4 +1,4 @@
-GPUS=2
+GPUS=1
 NNODES=1
 NODE_RANK=${NODE_RANK:-0}
 PORT=${PORT:-29158}
@@ -15,11 +15,11 @@ PYTHONPATH="$(dirname $0)/..":"$(dirname $0)":$PYTHONPATH \
     --nproc_per_node=$GPUS \
     --master_port=$PORT \
     utils/train.py \
-    --config=local_configs.NYUDepthv2.DFormerv2_S --gpus=$GPUS \
+    --config=local_configs.Fuji.DFormer_Small --gpus=$GPUS \
     --no-sliding \
     --no-compile \
     --syncbn \
-    --mst \
+    --no-mst \
     --compile_mode="default" \
     --no-amp \
     --val_amp \

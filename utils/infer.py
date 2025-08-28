@@ -110,7 +110,7 @@ with Engine(custom_parser=parser) as engine:
         "x_single_channel": config.x_is_single_channel,
         "class_names": config.class_names,
         "train_source": config.train_source,
-        "eval_source": config.eval_source,
+        "eval_source": config.val_source,
         "class_names": config.class_names,
     }
     # val_pre = ValPre()
@@ -159,8 +159,8 @@ with Engine(custom_parser=parser) as engine:
         with torch.no_grad():
             model.eval()
             device = torch.device("cuda")
-            # metric=evaluate(model, val_loader,config, device, engine)
-            # print('acc, macc, f1, mf1, ious, miou',acc, macc, f1, mf1, ious, miou)
+            metric=evaluate(model, val_loader,config, device, engine)
+            
             metric = evaluate_msf(
                 model,
                 val_loader,
@@ -174,4 +174,5 @@ with Engine(custom_parser=parser) as engine:
             ious, miou = metric.compute_iou()
             acc, macc = metric.compute_pixel_acc()
             f1, mf1 = metric.compute_f1()
+            print('acc, macc, f1, mf1, ious, miou',acc, macc, f1, mf1, ious, miou)
             print("miou", miou)

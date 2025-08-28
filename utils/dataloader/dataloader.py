@@ -200,7 +200,7 @@ def get_val_loader(engine, dataset, config, val_batch_size=1):
         "x_single_channel": config.x_is_single_channel,
         "class_names": config.class_names,
         "train_source": config.train_source,
-        "eval_source": config.eval_source,
+        "eval_source": config.val_source,
         "class_names": config.class_names,
         "dataset_name": config.dataset_name,
         "backbone": config.backbone,

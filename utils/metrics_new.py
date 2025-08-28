@@ -47,3 +47,30 @@ class Metrics:
         acc *= 100
         macc *= 100
         return acc.cpu().numpy().round(2).tolist(), round(macc, 2)
+        
+    def compute_precision_recall(self) -> Tuple[Tuple[float, float], Tuple[Tensor, Tensor]]:
+        """
+        Returns:
+            (precision_class1, recall_class1), ([precision_per_class], [recall_per_class])
+        """
+        TP = self.hist.diag()
+        FP = self.hist.sum(0) - TP  # Predicted as class i but not actually class i
+        FN = self.hist.sum(1) - TP  # Actually class i but predicted as something else
+
+        precision = TP / (TP + FP)
+        recall = TP / (TP + FN)
+
+        precision[precision.isnan()] = 0.0
+        recall[recall.isnan()] = 0.0
+
+        precision *= 100
+        recall *= 100
+        
+        print("precision",precision.cpu().numpy().round(2).tolist())
+        print("recall",recall.cpu().numpy().round(2).tolist())
+
+        # Assuming class 1 is the "apple" class
+        return (round(precision[1].item(), 2), round(recall[1].item(), 2)), (
+            precision.cpu().numpy().round(2).tolist(),
+            recall.cpu().numpy().round(2).tolist()
+        )

@@ -160,9 +160,6 @@ class RGBXDataset(data.Dataset):
         rgb = self._open_image(path_dict["rgb_path"], rgb_mode)
 
         gt = self._open_image(path_dict["gt_path"], cv2.IMREAD_GRAYSCALE, dtype=np.uint8)
-        if self._transform_gt:
-            gt = self._gt_transform(gt)
-
         x = {}
         for modal in self.x_modal:
             if modal == "d":

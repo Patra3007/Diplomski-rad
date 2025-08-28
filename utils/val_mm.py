@@ -98,12 +98,12 @@ def evaluate(model, dataloader, config, device, engine, save_dir=None, sliding=F
             modal_xs = modal_xs.unsqueeze(0)
         if len(labels.shape) == 2:
             labels = labels.unsqueeze(0)
-        # print(images.shape,labels.shape)
         images = [images.to(device), modal_xs.to(device)]
         labels = labels.to(device)
         if sliding:
             preds = slide_inference(model, images, modal_xs, config).softmax(dim=1)
         else:
+            assert images[0].shape[2:] == images[1].shape[2:], f"Mismatch: {images[0].shape} vs {images[1].shape}"
             preds = model(images[0], images[1]).softmax(dim=1)
         # print(preds.shape,labels.shape)
         B, H, W = labels.shape
@@ -170,6 +170,7 @@ def evaluate(model, dataloader, config, device, engine, save_dir=None, sliding=F
     # ious, miou = metrics.compute_iou()
     # acc, macc = metrics.compute_pixel_acc()
     # f1, mf1 = metrics.compute_f1()
+    metrics.compute_precision_recall()
     if engine.distributed:
         all_metrics = [None for _ in range(engine.world_size)]
         # all_predictions = Metrics(n_classes, config.background, device)
@@ -350,6 +351,13 @@ def evaluate_msf(
                     ],
                     dtype=np.uint8,
                 )
+                preds = palette[preds]
+                plt.imsave(save_name, preds)
+            elif config.dataset_name == "Fuji":
+                palette = np.array([
+                [0, 0, 0],       # background
+                [255, 0, 0],     # class 1 (e.g., apples)
+                ], dtype=np.uint8)
                 preds = palette[preds]
                 plt.imsave(save_name, preds)
             else:

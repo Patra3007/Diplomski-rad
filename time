@@ -1,0 +1,8 @@
+amodal1 Avg train time: 490.65s, avg eval time: 24.27s 28 epochs
+modal1  Avg train time: 491.38s, avg eval time: 24.38s 88 epochs
+amodal2 Avg train time: 491.41s, avg eval time: 24.36s 26 epochs
+modal2  Avg train time: 491.65s, avg eval time: 24.39s 36 epochs
+amodal3 Avg train time: 491.96s, avg eval time: 24.41s 42 epochs
+modal3  Avg train time: 492.10s, avg eval time: 24.43s 33 epochs 
+amodal4 Avg train time: 492.86s, avg eval time: 24.41s 29 epochs
+modal4  Avg train time: 493.51s, avg eval time: 24.50s 69 epochs

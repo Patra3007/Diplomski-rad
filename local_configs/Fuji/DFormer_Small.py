@@ -20,19 +20,21 @@ C.dataset_name = "Fuji"
 C.dataset_path = osp.join(C.root_dir, "Fuji")
 C.rgb_root_folder = osp.join(C.dataset_path, "RGB")
 C.rgb_format = ".jpg"
-C.gt_root_folder = osp.join(C.dataset_path, "Label")
+C.gt_root_folder = osp.join(C.dataset_path, "Label/modal_mask")
 C.gt_format = ".png"
 C.gt_transform = True
 C.x_root_folder = osp.join(C.dataset_path, "Depth")
 C.x_format = ".png"
 C.x_is_single_channel = True
-C.train_source = osp.join(C.dataset_path, "train.txt")
-C.eval_source = osp.join(C.dataset_path, "test.txt")
+C.train_source = osp.join(C.dataset_path, "train4.txt")
+C.eval_source = osp.join(C.dataset_path, "test4.txt")
+C.val_source = osp.join(C.dataset_path, "val4.txt")
 C.is_test = True
-C.num_train_imgs = 2747
-C.num_eval_imgs = 590
-C.num_classes = 1
-C.class_names = ["Jabuka"]
+C.num_train_imgs = 2355
+C.num_eval_imgs = 785
+C.num_val_imgs = 785
+C.num_classes = 2
+C.class_names = ['background','apple']
 
 """Image Config"""
 C.background = 255
@@ -41,7 +43,8 @@ C.image_width = 640
 C.norm_mean = np.array([0.485, 0.456, 0.406])
 C.norm_std = np.array([0.229, 0.224, 0.225])
 
-C.backbone = "DFormer-Small" 
+""" Settings for network, this would be different for each kind of model"""
+C.backbone = "DFormer-Small"  # Remember change the path below.
 C.pretrained_model = "checkpoints/pretrained/DFormer_Small.pth.tar"
 C.decoder = "ham"
 C.decoder_embed_dim = 512
@@ -55,11 +58,9 @@ C.weight_decay = 0.01
 C.batch_size = 3
 C.nepochs = 100
 C.niters_per_epoch = C.num_train_imgs // C.batch_size + 1
-C.num_workers = 12
+C.num_workers = 16
 C.train_scale_array = [0.5, 0.75, 1, 1.25, 1.5, 1.75]
-C.warm_up_epoch = 10
-C.channels = [96, 192, 288, 576]
-
+C.warm_up_epoch = 5
 
 C.fix_bias = True
 C.bn_eps = 1e-3
@@ -75,8 +76,8 @@ C.eval_flip = True  # False #
 C.eval_crop_size = [480, 640]  # [height weight]
 
 """Store Config"""
-C.checkpoint_start_epoch = 20
-C.checkpoint_step = 10
+C.checkpoint_start_epoch = 10
+C.checkpoint_step = 5
 
 """Path Config"""
 

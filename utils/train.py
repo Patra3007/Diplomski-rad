@@ -27,7 +27,7 @@ from utils.pyt_utils import all_reduce_tensor
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", help="train config file path")
-parser.add_argument("--gpus", default=2, type=int, help="used gpu number")
+parser.add_argument("--gpus", default=1, type=int, help="used gpu number")
 # parser.add_argument('-d', '--devices', default='0,1', type=str)
 parser.add_argument("-v", "--verbose", default=False, action="store_true")
 parser.add_argument("--epochs", default=0)
@@ -44,7 +44,7 @@ parser.add_argument("--amp", default=True, action=argparse.BooleanOptionalAction
 parser.add_argument("--val_amp", default=True, action=argparse.BooleanOptionalAction)
 parser.add_argument("--pad_SUNRGBD", default=False, action=argparse.BooleanOptionalAction)
 parser.add_argument("--use_seed", default=True, action=argparse.BooleanOptionalAction)
-parser.add_argument("--local-rank", default=0)
+parser.add_argument("--local-rank", default=1)
 # parser.add_argument('--save_path', '-p', default=None)
 
 # os.environ['MASTER_PORT'] = '169710'
@@ -56,7 +56,7 @@ torch._dynamo.config.suppress_errors = True
 
 
 def is_eval(epoch, config):
-    return epoch > int(config.checkpoint_start_epoch) or epoch == 1 or epoch % 10 == 0
+    return epoch > int(config.checkpoint_start_epoch) or epoch == 1
 
 
 class gpu_timer:
@@ -279,6 +279,8 @@ with Engine(custom_parser=parser) as engine:
     else:
         compiled_model = model
     miou, best_miou = 0.0, 0.0
+    epochs_without_improvement = 0
+    early_stop_patience = 10  # Stop if no improvement in 5 evals
     train_timer = gpu_timer()
     eval_timer = gpu_timer()
 
@@ -445,6 +447,7 @@ with Engine(custom_parser=parser) as engine:
                         f1, mf1 = metric.compute_f1()
                         if miou > best_miou:
                             best_miou = miou
+                            epochs_without_improvement = 0
                             engine.save_and_link_checkpoint(
                                 config.log_dir,
                                 config.log_dir,
@@ -452,6 +455,9 @@ with Engine(custom_parser=parser) as engine:
                                 infor="_miou_" + str(miou),
                                 metric=miou,
                             )
+                        else:
+                            epochs_without_improvement += 1
+                            logger.info(f"No improvement in mIoU. Patience: {epochs_without_improvement}/{early_stop_patience}")
                         print("miou", miou, "best", best_miou)
             elif not engine.distributed:
                 with torch.no_grad():
@@ -508,6 +514,7 @@ with Engine(custom_parser=parser) as engine:
                 # print('miou',miou)
                 if miou > best_miou:
                     best_miou = miou
+                    epochs_without_improvement = 0
                     engine.save_and_link_checkpoint(
                         config.log_dir,
                         config.log_dir,
@@ -515,6 +522,9 @@ with Engine(custom_parser=parser) as engine:
                         infor="_miou_" + str(miou),
                         metric=miou,
                     )
+                else:
+                    epochs_without_improvement += 1
+                    logger.info(f"No improvement in mIoU. Patience: {epochs_without_improvement}/{early_stop_patience}")
                 print("miou", miou, "best", best_miou)
             logger.info(f"Epoch {epoch} validation result: mIoU {miou}, best mIoU {best_miou}")
             eval_timer.stop()
@@ -528,3 +538,6 @@ with Engine(custom_parser=parser) as engine:
         logger.info(
             f"Avg train time: {train_timer.mean_time:.2f}s, avg eval time: {eval_timer.mean_time:.2f}s, left eval count: {eval_count}, ETA: {eta}"
         )
+        if epochs_without_improvement >= early_stop_patience:
+    	    logger.info(f"Early stopping triggered after {early_stop_patience} evaluations without improvement.")
+    	    break
