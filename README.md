@@ -56,12 +56,13 @@ Code in this repo is for non-commercial use only.
 
 
 
-
-How to use this method:
+<br><br>
+## How to use this method:
 
 
 
 <br><br>
+
 ## **1) Environment setup**
 
 
